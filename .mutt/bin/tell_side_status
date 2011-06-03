@@ -1,0 +1,6 @@
+#!/bin/bash
+
+stat="$(grep "side_status" ~/.mutt/var/sidebar_conf | sed  's/side_status="\(.*\)"/\1/')"
+
+[[ $stat -eq "0" ]] && echo -n "no" || echo -n "yes"
+

@@ -1,2 +1,0 @@
-#!/bin/sh
-[ -f ~/.mutt/themes/$1 ] && { rm ~/.mutt/themes.default; ln -s ~/.mutt/themes/$1 ~/.mutt/themes.default; }

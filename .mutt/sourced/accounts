@@ -1,0 +1,67 @@
+# =======================================================================================
+#                   _   _
+#   _ __ ___  _   _| |_| |_ _ __ ___
+#  | '_ ` _ \| | | | __| __| '__/ __|
+#  | | | | | | |_| | |_| |_| | | (__
+#  |_| |_| |_|\__,_|\__|\__|_|  \___|
+# ---------------------------------------------------------------------------------------
+# NAME: accounts
+# NOTE: ovde su definisani mail nalozi
+# NOTE: ovo je public fajl za Github, private je u bekapu
+# =======================================================================================
+
+# === DEFAULTS ==========================================================================
+
+# --- Mailboxes -------------------------------------------------------------------------
+
+  set folder = "~/.Mail/mailboxes"
+ 
+  unmailboxes *
+
+# ovde dodam one koje hocu prvo da izlista:
+  mailboxes `find ~/.Mail/mailboxes/Default -mindepth 1 -type d -printf '"%h" \n' |sort -u | tr "\n" " "`
+  mailboxes `find ~/.Mail/mailboxes/[Gmail]\ aceofknaves -mindepth 1 -type d -printf '"%h" \n' |sort -u | tr "\n" " "`
+  mailboxes `find ~/.Mail/mailboxes/[Gmail]\ postmanmiler -mindepth 1 -type d -printf '"%h" \n' |sort -u | tr "\n" " "`
+# sada dodam sve ostale:
+  mailboxes `find ~/.Mail/mailboxes -mindepth 2 -type d -printf '"%h" \n' | sort -u | tr "\n" " "`
+
+# --- Default Hooks ---------------------------------------------------------------------
+  folder-hook	 .  'source "~/.mutt/sourced/profiles/default"'
+
+# === GMAIL ACCOUNTS ====================================================================
+
+# --- aceofknaves@gmail.com -------------------------------------------------------------
+  folder-hook	 imaps://aceofknaves@imap.gmail.com/$ ' \
+  		source "~/.mutt/sourced/profiles/aceofknaves@gmail.com"; \
+  		set folder = "imaps://aceofknaves@imap.gmail.com"; \
+ 		set imap_pass = `echo -n "$(pwsafe -p aceofknaves@gmail.com -q -E | tail -n 1)"`; \
+		set smtp_pass = $imap_pass; \
+		set smtp_url = "smtps://aceofknaves@smtp.gmail.com"; \
+  		set record = "imaps://imap.gmail.com/[Gmail]/Sent Mail"; \
+  		set postponed = "imaps://imap.gmail.com/[Gmail]/Drafts"'
+
+  mailboxes "imaps://aceofknaves@imap.gmail.com"
+
+  folder-hook	 '~/.Mail/mailboxes/\[Gmail\] aceofknaves' '\
+  		source "~/.mutt/sourced/profiles/aceofknaves@gmail.com"'
+
+  alternates -group me ".*aceofknaves.*@gmail.com$"
+
+# --- postmanmiler@gmail.com ------------------------------------------------------------
+  folder-hook	 imaps://postmanmiler@imap.gmail.com/$ ' \
+  		source "~/.mutt/sourced/profiles/postmanmiler@gmail.com"; \
+  		set folder = "imaps://postmanmiler@imap.gmail.com"; \
+ 		set imap_pass = `echo -n "$(pwsafe -p postmanmiler@gmail.com -q -E | tail -n 1)"`; \
+		set smtp_pass = $imap_pass; \
+ 		set smtp_url = "smtps://postmanmiler@smtp.gmail.com"; \
+  		set record = "imaps://imap.gmail.com/[Gmail]/Sent Mail"; \
+  		set postponed = "imaps://imap.gmail.com/[Gmail]/Drafts"'
+
+  mailboxes "imaps://postmanmiler@imap.gmail.com"
+  
+  folder-hook    '~/.Mail/mailboxes/\[Gmail\] postmanmiler' '\
+  		source "~/.mutt/sourced/profiles/postmanmiler@gmail.com"'
+
+  alternates -group me ".*postmanmiler.*@gmail.com$"
+
+# =======================================================================================

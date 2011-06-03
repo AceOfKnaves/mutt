@@ -1,78 +1,152 @@
-# -*- muttrc -*-
-#
-# List of mailing lists I'm subscribed to.
-#
+# =======================================================================================
+#                   _   _
+#   _ __ ___  _   _| |_| |_ _ __ ___
+#  | '_ ` _ \| | | | __| __| '__/ __|
+#  | | | | | | |_| | |_| |_| | | (__
+#  |_| |_| |_|\__,_|\__|\__|_|  \___|
+# ---------------------------------------------------------------------------------------
+# Name: lists
+# Note: List of mailing lists I'm subscribed to.
+# =======================================================================================
 
-lists bcm43xx
-lists or-announce
-lists or-talk
-lists sdhci-devel@list.drzeus.cx
-lists sdhci-devel@lists.sourceforge.net
-lists xfce-goodies-dev
-lists xfce@xfce.org
-lists yafc-user
-subscribe anillo-lst
-subscribe arch-ports
-subscribe arch@archlinux.org
-subscribe asterisk-users
-subscribe awesome
-subscribe bar@lug.fi.uba.ar
-subscribe bluez-users
-subscribe dwm
-subscribe fetchmail-friends
-subscribe gnupg-users
-subscribe gnupg-users
-subscribe grulic
-subscribe gtkpod-devel
-subscribe gtkpod-questions
-subscribe joda@lug.fi.uba.ar
-subscribe jornadas-2006
-subscribe jornadas2006
-subscribe linux-thinkpad
-subscribe lists
-subscribe lug-clasificados 
-subscribe lug-devel@lugmen.org.ar
-subscribe lug-electronica 
-subscribe lug-taliban
-subscribe lug-grouchesque@lugmen.org.ar
-subscribe lug-install@lugmen.org.ar
-subscribe lug-list@lugmen.org.ar
-subscribe lug-noticias@lugmen.org.ar
-subscribe lug-novatos@lugmen.org.ar
-subscribe lug-org-private@lugmen.org.ar
-subscribe lug-org@lugmen.org.ar
-subscribe lug-p10n 
-subscribe lug-server@lugmen.org.ar
-subscribe lug-website@lugmen.org.ar
-subscribe lug-wireless 
-subscribe lug-wireless@lugmen.org.ar
-subscribe lug@listas.fi.uba.ar
-subscribe lugro
-subscribe ml-milug
-subscribe msmtp-users
-subscribe musicbrainz-users
-subscribe mutt-announce
-subscribe mutt-dev
-subscribe mutt-users
-subscribe noticias@lug.fi.uba.ar
-subscribe org@lug.fi.uba.ar
-subscribe pacman-dev
-subscribe pam-mount-user
-subscribe postfix-users
-subscribe remind-fans@lists.whatexit.org
-subscribe solar
-subscribe squid-users
-subscribe synce-cvslog
-subscribe synce-users
-subscribe tur-users
-subscribe ubuntu-users
-subscribe uucpssh-users
-subscribe vim
-subscribe wireless-list@mendoza-wireless.net.ar 
-subscribe wireless-org@mendoza-wireless.net.ar 
-subscribe wmii@wmii.de
-subscribe zsh-users
-subscribe zsh-workers
+# === Lists =============================================================================
+  lists @googlegroups.com
+  lists @gentoo.org
+  lists @lists.gentoo.org
+  lists @lists.sourceforge.net
+  lists @lists.sourceforge.net
+  lists @lists.suckless.org
+  lists @lists.torproject.org
+  lists @nl.linux.org
+  lists @vger.kernel.org
+  lists @yahoogroups.com
+  lists @linuxsecurity.com
+  
+  lists darknet-tools.freenetproject.org
+  lists gentoo-announce.gentoo.org
+  lists linux-admin.vger.kernel.org
+  lists mailman.rakshasa.no
+  lists majordomo
+  lists sup-devel.rubyforge.org
+  lists tinhat.opensource.dyc.edu
 
-subscribe lts-dev
-subscribe tempest-dev
+# === Subscribed Lists ==================================================================
+
+# --- Tor -------------------------------------------------------------------------------
+  subscribe or-announce@freehaven.net
+  subscribe or-talk@freehaven.net
+  subscribe tor-announce@lists.torproject.org
+  subscribe tor-talk@lists.torproject.org
+  subscribe or-announce@torproject.org
+  subscribe or-talk@torproject.org
+  subscribe majordomo@seul.org
+  subscribe or-announce@seul.org
+  subscribe or-talk@seul.org
+# --- Freenet ---------------------------------------------------------------------------
+  subscribe chat@freenetproject.org
+  subscribe darknet-tools@freenetproject.org
+  subscribe devl@freenetproject.org
+  subscribe support@freenetproject.org
+  subscribe tech@freenetproject.org
+# --- Gentoo ----------------------------------------------------------------------------
+  subscribe gentoo-admin@gentoo.org
+  subscribe gentoo-admin@lists.gentoo.org
+  subscribe gentoo-announce@gentoo.org
+  subscribe gentoo-announce@lists.gentoo.org
+  subscribe gentoo-desktop@gentoo.org
+  subscribe gentoo-desktop@lists.gentoo.org
+  subscribe gentoo-doc@gentoo.org
+  subscribe gentoo-doc@lists.gentoo.org
+  subscribe gentoo-hardened.@gentoo.org
+  subscribe gentoo-hardened.@lists.gentoo.org
+  subscribe gentoo-hardened@lists.gentoo.org
+  subscribe gentoo-performance@gentoo.org
+  subscribe gentoo-performance@lists.gentoo.org
+  subscribe gentoo-project@gentoo.org
+  subscribe gentoo-project@lists.gentoo.org
+  subscribe gentoo-security@gentoo.org
+  subscribe gentoo-security@lists.gentoo.org
+  subscribe gentoo-user@gentoo.org
+  subscribe gentoo-user@lists.gentoo.org
+  subscribe gentoo-web-user@gentoo.org
+  subscribe gentoo-web-user@lists.gentoo.org
+# --- GnuPG -----------------------------------------------------------------------------
+  subscribe gnupg-announce)@gnupg.org
+  subscribe gnupg-announce@gnupg.org
+  subscribe gnupg-users)@gnupg.org
+  subscribe gnupg-users@gnupg.org
+# --- LUG-Beograd -----------------------------------------------------------------------
+  subscribe lug-beograd@googlegroups.com
+  subscribe LUG-Beograd@googlegroups.com
+# --- Razmenavestina --------------------------------------------------------------------
+  subscribe razmenavestina@googlegroups.com
+# --- Vim -------------------------------------------------------------------------------
+  subscribe vim-announce@vim.org
+  subscribe vim@googlegroups.com
+  subscribe vim@vim.org
+  subscribe vim_dev@googlegroups.com
+  subscribe vim-dev@googlegroups.com
+  subscribe vim_dev@vim.org
+  subscribe vim-dev@vim.org
+  subscribe vim_multibyte@googlegroups.com
+  subscribe vim-multibyte@googlegroups.com
+  subscribe vim_multibyte@vim.org
+  subscribe vim-multibyte@vim.org
+  subscribe vim_use@googlegroups.com
+  subscribe vim-use@googlegroups.com
+  subscribe vim_use@vim.org
+  subscribe vim-use@vim.org
+# --- Xmonad ----------------------------------------------------------------------------
+  subscribe xmonad@haskell.org
+# --- Linux Kernel ----------------------------------------------------------------------
+  subscribe linux-kernel-announce@hera.kernel.org
+# --- LinuxSecurity ---------------------------------------------------------------------
+  subscribe newsletter@linuxsecurity.com
+  subscribe vuln-newsletter@linuxsecurity.com
+# --- CMUS ------------------------------------------------------------------------------
+  subscribe cmus-devel@lists.sf.net
+  subscribe cmus-devel@lists.sourceforge.net
+# --- UZBL ------------------------------------------------------------------------------
+  subscribe uzbl-dev@lists.uzbl.org
+# --- Mutt ------------------------------------------------------------------------------
+  subscribe fleas@mutt.org
+  subscribe mutt-announce@mutt.org
+  subscribe mutt-dev@mutt.org
+  subscribe mutt-po@mutt.org
+  subscribe mutt-users@mutt.org
+# --- Awesome ---------------------------------------------------------------------------
+  subscribe awesome@naquadah.org
+# --- Nl.linux.org ----------------------------------------------------------------------
+  subscribe linux-arch@nl.linux.org
+  subscribe linux-crypto@nl.linux.org
+  subscribe securedistros@nl.linux.org
+# --- Rtorrent --------------------------------------------------------------------------
+  subscribe libtorrent-devel@rakshasa.no
+# --- Sup -------------------------------------------------------------------------------
+  subscribe sup-devel@rubyforge.org
+  subscribe sup-talk@rubyforge.org
+# --- Slackware -------------------------------------------------------------------------
+  subscribe slackware-announce@slackware.com
+  subscribe slackware-security@slackware.com
+# --- Suckless.org ----------------------------------------------------------------------
+  subscribe dev@suckless.org
+  subscribe dwm@suckless.org
+  subscribe wmii@suckless.org
+# --- Vger.kernel.org--------------------------------------------------------------------
+  subscribe linux-apps@vger.kernel.org
+  subscribe linux-config@vger.kernel.org
+  subscribe linux-console@vger.kernel.org
+  subscribe linux-c-programming@vger.kernel.org
+  subscribe linux-crypto@vger.kernel.org
+# --- Irish Stew ------------------------------------------------------------------------
+  subscribe irish_stew_of_sindidun@yahoo.com
+# --- ETF -------------------------------------------------------------------------------
+  subscribe etf_2005@yahoogroups.com
+  subscribe etf-2005@yahoogroups.com
+  subscribe ETF_2005@yahoogroups.com
+  subscribe ETF-2005@yahoogroups.com
+# --- MSMTP Users -----------------------------------------------------------------------
+  subscribe msmtp-users@sourceforge.net
+# ---------------------------------------------------------------------------------------
+
+# =======================================================================================

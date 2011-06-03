@@ -1,24 +1,59 @@
-# -*- muttrc -*-
-#
-# Composing & sending
-#
+# =======================================================================================
+#                   _   _
+#   _ __ ___  _   _| |_| |_ _ __ ___
+#  | '_ ` _ \| | | | __| __| '__/ __|
+#  | | | | | | |_| | |_| |_| | | (__
+#  |_| |_| |_|\__,_|\__|\__|_|  \___|
+# ---------------------------------------------------------------------------------------
+# Name: composing
+# Note: Composing and sending
+# =======================================================================================
 
-set mime_forward			# Forward message as MIME attachments.
-unset reply_self
-set fast_reply
-					# Spell checking with http://www.vim.org/scripts/script.php?script_id=195
-# set editor="vim \"+normal \\\\ec\" +/^$/"
-# superceeded by inserting mail-specific settings into mail file format definition
-# set editor="/usr/bin/vim -s ~/.mutt/vim/commands -u ~/.mutt/vim/vimrc"
-set editor="/usr/bin/vim -s ~/.mutt/vim/commands"
-set edit_headers			# Permit editting of message headers
-set sendmail_wait=-1			# Don't wait around for sendmail.
-#set sendmail="$HOME/.mutt/scripts/msmtpqueue/msmtp-enqueue.sh"		# Use msmtp
-#set sendmail="/usr/bin/msmtp"		# Use msmtp
-set signature="~/.signature"
-set dotlock_program=/usr/bin/mutt_dotlock
-# Recommended crap from msmtp man page that I don't need.
-# set use_from=yes
-# set realname="redondos--"
-# set from=redondos@gmail.com
-# set envelope_from=yes
+# === COMPOSING =========================================================================
+
+  set reverse_name = yes
+# When unset, override any realnames with the setting of the realname variable
+  set reverse_realname = no
+
+# --- Forwarding ------------------------------------------------------------------------
+# Forward message as MIME attachments:
+  set mime_forward
+
+# --- Replying --------------------------------------------------------------------------
+  set reply_self
+  set fast_reply
+
+# --- Editor ----------------------------------------------------------------------------
+# set editor = "/usr/bin/vim"
+
+# This will launch vim with the cursor at the first blank line
+  set editor = "/usr/bin/vim +/^$"
+
+# set autoedit
+
+# --- Editor (spell checking in vim) ----------------------------------------------------
+# Check spelling using this plugin: (http://www.vim.org/scripts/script.php?script_id=195)
+
+# set editor = "vim \"+normal \\\\ec\" +/^$/"
+# set editor = "/usr/bin/vim -s ~/.mutt/vim/commands -u ~/.mutt/vim/vimrc"
+# set editor = "/usr/bin/vim -s ~/.mutt/vim/commands"
+
+# --- Signature -------------------------------------------------------------------------
+# A line containing "--" will be inserted before signature:
+  set sig_dashes
+  set sig_on_top=no
+
+# --- Headers ---------------------------------------------------------------------------
+# Enable my_hdr fields:
+  set hdrs=yes
+# Permit editting of message headers
+  set edit_headers = yes
+
+# --- Aborting --------------------------------------------------------------------------
+  set abort_nosubject=ask-no
+  set abort_unmodified=ask-no
+
+# Dotlock program (locks mail spool files):
+  set dotlock_program=/usr/bin/mutt_dotlock
+
+# =======================================================================================

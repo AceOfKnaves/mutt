@@ -1,0 +1,5 @@
+#!/bin/bash
+side_width="31"
+side_status="0"
+side_max_w="80"
+side_min_w="15"

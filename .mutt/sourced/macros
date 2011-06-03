@@ -1,198 +1,148 @@
-# -*- muttrc -*-
+# =======================================================================================
+#                   _   _
+#   _ __ ___  _   _| |_| |_ _ __ ___
+#  | '_ ` _ \| | | | __| __| '__/ __|
+#  | | | | | | |_| | |_| |_| | | (__
+#  |_| |_| |_|\__,_|\__|\__|_|  \___|
+# ---------------------------------------------------------------------------------------
+# Name: macros
+# Note: Macros for mutt
+# =======================================================================================
+
+# === Macros ============================================================================
+
+# --- Keybindings za Gmail --------------------------------------------------------------
+# Ovaj je bitan zbog imena foldera (sa space) na IMAP:
+# bind editor <space> noop
+
+# macro index,pager y "<save-message>i=[Gmail]/All Mail<enter><enter>"     "Archive"
+# macro index,pager d "<save-message>=[Gmail]/Trash<enter><enter>"         "Trash"
+# macro index         gi "<change-folder>=INBOX<enter>"                    "Go to Inbox"
+# macro index         ga "<change-folder>=[Gmail]/All Mail<enter>"         "Go to all mail"
+# macro index         gs "<change-folder>=[Gmail]/Starred<enter>"          "Go to Starred Messages"
+# macro index         gd "<change-folder>=[Gmail]/Drafts<enter>"           "Go to Drafts"
 #
-# Macros for mutt.
-#
+# macro index,pager S "<save-message>=[Gmail]/Spam?<enter>"                "Mark message as SPAM
+# macro index,pager H "<save-message>=INBOX<enter>"                        "Mark message as Ham"
+# ---------------------------------------------------------------------------------------
 
-set wait_key=no				# Don't show the "Press any key to continue..." message.
+# --- Message filters -------------------------------------------------------------------
+  macro index         ,la    "<limit>~A<enter>"  "Limit view to: ALL"
+  macro index         ,lf    "<limit>~F<enter>"  "Limit view to: Flagged"
+  macro index         ,lt    "<limit>~T<enter>"  "Limit view to: Tagged"
+  macro index         ,ld    "<limit>~D<enter>"  "Limit view to: Deleted"
+  macro index         ,ln    "<limit>~N<enter>"  "Limit view to: New"
+  macro index         ,lu    "<limit>~O<enter>"  "Limit view to: Unread"
+  macro index         ,lU    "<limit>~U<enter>"  "Limit view to: New and Unread"
+  macro index         ,lg    "<limit>~g<enter>"  "Limit view to: Signed"
+  macro index         ,lG    "<limit>~G<enter>"  "Limit view to: Encrypted"
+  macro index         ,ll    "<limit>~l<enter>"  "Limit view to: Known mailing list"
+  macro index         ,lL    "<limit>!~l<enter>" "Limit view to: NOT in Known mailing list"
+  macro index         ,lp    "<limit>~p<enter>"  "Limit view to: To me"
+  macro index         ,lP    "<limit>~P<enter>"  "Limit view to: From me"
+  macro index         ,l=    "<limit>~=<enter>"  "Limit view to: Duplicates"
 
-## Fetchmail
-macro	index,pager	G	'<shell-escape>ssh twat.com.ar fetchmail<enter>'	'awake fetchmail daemon process'
+  macro index         ,lb    "<limit>~b "        "Limit view to: Search in body"
+  macro index         ,lB    "<limit>~B "        "Limit view to: Search in whole messabe"
+  macro index         ,ly    "<limit>~y "        "Limit view to: X-Label:"
+  macro index         \Cx    "<limit>~y "        "Limit view to: X-Label:"
+# ---------------------------------------------------------------------------------------
 
-## Page down/up
-macro	index,pager		<PageDown>	<half-down>
-macro	index,pager		<PageUp>	<half-up>
+# --- Trash -----------------------------------------------------------------------------
+# Ovo sluzi zbog maildir_trash opcije koja ako je setovana sync-uje (na dugme $) trash
+# u remote folderu (valjda), ali zato ne moze da se radi localni sync setujemo promenjivu
+# u zavisnosti da li radimo na remote folderu (gmail) ili localno. Mislim da ovo ne radi
+# btw, sve sam pomesao
 
-## Bogofilter
-# macro index S "<pipe-entry>ssh twat.com.ar bogofilter -Ns<enter><save-message>=Spam<enter><limit>!~D<enter><end>"	"learn as spam and save to junk"
-macro index,pager S "<pipe-entry>ssh twat.com.ar bogofilter -Ns<enter><save-message>=Spam<enter>"				"learn as spam and save to junk"
-macro index,pager H "<pipe-entry>ssh twat.com.ar bogofilter -Sn<enter>"							"learn as ham"
+# set maildir_trash = no
+# folder-hook ~A bind index $ <sync-mailbox>
+# folder-hook +INBOX 'macro index $ "<sync-mailbox>!isync -e INBOX\n"'
 
-## Grouchosity-filter
-macro index,pager ',g' '<pipe-entry>ssh twat.com.ar bogofilter -c ~/.bogofilter/groucho/groucho.cf -Ns<enter>'		"learn as grouchesque"
-macro index,pager ',G' "<pipe-entry>ssh twat.com.ar bogofilter -c ~/.bogofilter/groucho/groucho.cf -Sn<enter>"		"unlearn as grouchesque"
+# folder-hook .      'macro index d "<save-message>=Trash<enter><limit>!~D<enter><end>"'
+# folder-hook *Trash 'macro index d <delete-message>'
+# ---------------------------------------------------------------------------------------
 
-## URLView
-macro index,pager,attach,compose B "\
-	<enter-command> set my_pipe_decode=\$pipe_decode pipe_decode<Enter>\
-	<pipe-message> urlview<Enter>\
-	<enter-command> set pipe_decode=\$my_pipe_decode; unset my_pipe_decode<Enter>" \
-	"call urlview to extract URLs out of a message"
-# macro index,pager B '<pipe-entry>urlview<enter>' 'URLView'
+# --- ovo je da otvori current folder u browseru ----------------------------------------
+# NOTE: sluzi za npr. IMAP ako hocu da izlistam sve foldere u $folder, posto normalni "c"
+# ocigledno ne radi kako treba.
+# ---------------------------------------------------------------------------------------
+  macro index,pager ,c "<change-folder><kill-line>=<tab><tab><tab>"
+# ---------------------------------------------------------------------------------------
+
+# --- URLView 1 -------------------------------------------------------------------------
+  macro index,pager,attach,compose \CB "<enter-command> set my_pipe_decode=\$pipe_decode pipe_decode<Enter><pipe-message> urlview<Enter><enter-command> set pipe_decode=\$my_pipe_decode; unset my_pipe_decode<Enter>" "call urlview to extract URLs out of a message"
+# macro index,pager B   '<pipe-entry>urlview<enter>'    'URLView'
 # macro index,pager \cb '<pipe-message> urlview<enter>' 'URLView'
-macro index,pager \cb "<enter-command> set my_pdsave=\$pipe_decode<enter>\
-<enter-command> unset pipe_decode<enter>\
-<pipe-message>~/.mutt/scripts/extract_url.pl<enter>\
-<enter-command> set pipe_decode=\$my_pdsave<enter>" "get URLs"
+# ---------------------------------------------------------------------------------------
 
-## From header
-macro index,pager,compose ,11 "<edit-from><kill-line>redondos <redondos@gmail.com><enter>" 		"From: redondos <redondos@gmail.com>"
-macro index,pager,compose ,12 "<edit-from><kill-line>Angel Olivera <aolivera@gmail.com><enter>"		"From: Angel Olivera <aolivera@gmail.com>"
-macro index,pager,compose ,13 "<edit-from><kill-line>Angelo Olivera <aolivera@gmail.com><enter>"		"From: Angelo Olivera <aolivera@gmail.com>"
-macro index,pager,compose ,14 "<edit-from><kill-line>Angel Olivera <redondos@gmail.com><enter>"		"From: Angel Olivera <redondos@gmail.com>"
+# --- URLView 2 (simulate the old url menu) ---------------------------------------------
+# macro index \cb |urlview\n 'call urlview to extract URLs out of a message'
+# macro pager \cb |urlview\n 'call urlview to extract URLs out of a message'
+# ---------------------------------------------------------------------------------------
 
-macro index,pager,compose ,21 "<edit-from><kill-line>redondos <redondos@twat.com.ar><enter>" 		"From: redondos <redondos@twat.com.ar>"
-macro index,pager,compose ,22 "<edit-from><kill-line>Angel Olivera <redondos@twat.com.ar><enter>" 	"From: Angel Olivera <redondos@twat.com.ar>"
-macro index,pager,compose ,23 "<edit-from><kill-line>redondos <redondos@lugmen.org.ar><enter>" 		"From: redondos <redondos@lugmen.org.ar>"
-macro index,pager,compose ,24 "<edit-from><kill-line>Angel Olivera <aolivera@aolivera.com.ar><enter>" 	"From: Angel Olivera <aolivera@aolivera.com.ar>"
+# --- X-Label (Gmail-like mail tagging) -------------------------------------------------
+  macro index,pager x     "<enter-command>set editor=\"~/.mutt/bin/editlabel.sh append\"\n<edit><next-undeleted><enter-command>set editor=vim\n<sync-mailbox>" "Append label"
+  macro index,pager X     "<enter-command>set editor=\"~/.mutt/bin/editlabel.sh menu\"\n<edit><next-undeleted><enter-command>set editor=vim\n<sync-mailbox>" "Edit labels"
+# macro index      \Cx    "<limit>~y " "Limit view to label"
+# ---------------------------------------------------------------------------------------
 
-macro index,pager,compose ,31 "<edit-from><kill-line>Angelo Olivera <angelo@ncomputing.com><enter>" 	"From: Angelo Olivera <angelo@ncomputing.com>"
-macro index,pager,compose ,32 "<edit-from><kill-line>Angelo Olivera <angelo@nc-company.com><enter>" 	"From: Angelo Olivera <angelo@nc-company.com>"
-macro index,pager,compose ,32 "<edit-from><kill-line>Angelo Olivera <aolivera@ncomputing.com><enter>" 	"From: Angelo Olivera <aolivera@ncomputing.com>"
+# --- Run fetchmail ---------------------------------------------------------------------
+  macro index       G     "<shell-escape>fetchmail -k -m '/usr/bin/procmail -d %T'|grep -v skipping<Enter>"
+# ---------------------------------------------------------------------------------------
 
-## Trash
-# macro index d "<save-message>=Trash<enter><limit>!~D<enter><end>"
-# macro index d "<save-message>=Trash<enter>"
+# --- Mark all read ---------------------------------------------------------------------
+  macro index      ,,r    '<tag-pattern>~U<enter><tag-prefix-cond><clear-flag>N<untag-pattern>~T<enter><enter-command> set my_echo="All mail marked read"<enter><enter-command> set ?my_echo<enter>' "mark all read"
+# macro index      ,r     '<tag-pattern>.<enter><tag-prefix-cond><clear-flag>N<untag-pattern>.<enter><enter-command> set my_echo="All mail marked read"<enter><enter-command> set ?my_echo<enter>' "mark all read"
+# ---------------------------------------------------------------------------------------
 
-## Color switching
-macro	index,pager	',k'	"<enter-command> source ~/.mutt/sourced/themes.random<enter>" "random color theme"
-macro	index,pager	',d'	"<enter-command> source ~/.mutt/themes.default<enter>"	"revert to default theme"
-# macro	index,pager	,K	<shell-escape> rm ~/.mutt/theme.default; ln -s
-# ~/.mutt/themes/$my_theme ~/.mutt/theme.default"	"set default theme"
-macro	index,pager	,K	"<enter-command> source ~/.mutt/sourced/themes.set<enter>" "set default theme"
+# --- Color Switching (fali randomise f-ja) ---------------------------------------------
+# macro    index,pager    ,k    "<enter-command> source ~/.mutt/sourced/themes.random<enter>" "random color theme"
+# macro    index,pager    ,d    "<enter-command> source ~/.mutt/themes.default<enter>"    "revert to default theme"
+# macro    index,pager    ,K    <shell-escape> rm ~/.mutt/theme.default; ln -s ~/.mutt/themes/$my_theme ~/.mutt/theme.default"    "set default theme"
+# macro    index,pager    ,K    "<enter-command> source ~/.mutt/sourced/themes.set<enter>" "set default theme"
+# ---------------------------------------------------------------------------------------
 
-## Sidebar
-macro index <f10> '<enter-command>toggle sidebar_visible<enter><refresh>'
-macro pager <f10> '<enter-command>toggle sidebar_visible<enter><redraw-screen>'
+# --- Mairix ----------------------------------------------------------------------------
+ macro index,pager ,f      "<shell-escape>mairix " "search via mairix"
+ macro index,pager ,,f     "<change-folder><kill-line>~/.Mail/mairix/Search_Results<enter><shell-escape>mairix " "search via mairix"
+# ---------------------------------------------------------------------------------------
 
-## Open archive folders
-macro index,pager ',a' '<enter-command> set mask=".*"<enter>\
-				<change-folder-readonly>~/.mail_archive/.<complete><complete>' 'open an archive folder'
+# --- Namazu/nmzmail --------------------------------------------------------------------
+# macro index,pager ,F    "<shell-escape>nmzmail -r ~/.maildir/.Search<enter>" "Search via nmzmail"
+# macro generic     ,S    "<shell-escape>nmzmail<return><esc>c~/.nmzmail/result<return>" "Search via nmzmail"
+# Load the results mailbox:
+# macro index,pager ,,f    "<change-folder><kill-line>=Search<enter>" "load the search results mailbox"
+# ---------------------------------------------------------------------------------------
 
-## Change folder
-# Restore mask first
+# === STOLEN FROM INIT0: http://phpfi.com/200883 ========================================
 
-# Original
-# macro index,pager 'c' '<enter-command>set mask=$my_mask<enter>\
-#			<change-folder>' 'open a different folder'
+# --- meta-b -> search body (~b) --------------------------------------------------------
+  macro index         \eb     '/~b ' 'search in message bodies'
+# ---------------------------------------------------------------------------------------
 
-# Mailboxes view
-macro index,pager 'C' '<change-folder>?<toggle-mailboxes>' "enter mailboxes view"
+# --- Find first new message ------------------------------------------------------------
+  macro index         \ef    '<first-entry><next-new><current-middle>' 'center first new message'
+# ---------------------------------------------------------------------------------------
 
-# Open and search
-macro index,pager ',c' '<enter-command>set mask=$my_mask<enter>\
-			<change-folder>?<search>'\
-			'open a different folder and search'
+# --- First/last entry in pager ---------------------------------------------------------
+  macro pager        -        <exit><first-entry><display-message> "goto first message"
+# macro pager        <home>   <exit><first-entry><display-message> "goto first message" 
+  macro pager        =        <exit><last-entry><display-message "goto last message"
+# macro pager        <end>    <exit><last-entry><display-message "goto last message">
+# ---------------------------------------------------------------------------------------
 
-# Just open
-macro index,pager ',c' '<enter-command>set mask=$my_mask<enter>\
-			<change-folder>=<complete><complete><complete>'\
-			'open a different folder'
+# --- Verify sig when c_v_s is off by default -------------------------------------------
+  macro index        ,P    "<enter-command> set crypt_verify_sig<enter><display-message><enter-command> unset crypt_verify_sig<enter>" "verify pgp sig"
+  macro pager        ,p    "<enter-command> set crypt_verify_sig<enter><exit><display-message><enter-command> unset crypt_verify_sig<enter>" "verify pgp sig"
+# ---------------------------------------------------------------------------------------
 
-# Change account
-bind generic a noop
-# macro index,pager 'a1' 'set spoolfile=imaps://refinery.twat.com.ar<enter>; <change-folder>!<enter>'	'account: redondos@twat.com.ar'
-# macro index,pager 'a2' 'set spoolfile=imaps://lugmen.org.ar<enter>; <change-folder>!<enter>'	'account: redondos@lugmen.org.ar'
-# macro index,pager 'a3' 'set spoolfile=imaps:///aolivera@imap.gmail.com:993/<enter>; <change-folder>!<enter>'	'account: aolivera@gmail.com'
-# macro index,pager 'a4' 'set spoolfile=imaps:///redondos@imap.gmail.com:993/<enter>; <change-folder>!<enter>'	'account: redondos@gmail.com'
-macro index,pager 'a1' '<change-folder>imaps://refinery.twat.com.ar/INBOX<enter>'	'account: redondos@twat.com.ar'
-macro index,pager 'a2' '<change-folder>imaps://lugmen.org.ar<enter>'			'account: redondos@lugmen.org.ar'
-macro index,pager 'a3' '<change-folder>imaps://aolivera@imap.gmail.com<enter>'		'account: aolivera@gmail.com'
-macro index,pager 'a4' '<change-folder>imaps://redondos@imap.gmail.com<enter>'		'account: redondos@gmail.com'
+# --- Reload config 1 -------------------------------------------------------------------
+  macro    index,pager,pager    <f5>    '<enter-command> set my_status="Reloaded configuration"; source ~/.mutt/muttrc; set ?my_status<enter>'    "Reload muttrc"
+# ---------------------------------------------------------------------------------------
 
-# Open in a different IMAP server
-macro index,pager ',c1' '<change-folder>?<change-dir><kill-line>imaps://refinery.twat.com.ar<enter>'	'account: redondos@twat.com.ar'
-macro index,pager ',c2' '<change-folder>?<change-dir><kill-line>imaps://lugmen.org.ar<enter>'		'account: redondos@lugmen.org.ar'
-macro index,pager ',c3' '<change-folder>?<change-dir><kill-line>imaps://aolivera@imap.gmail.com:993/<enter>'		'account: aolivera@gmail.com'
-macro index,pager ',c4' '<change-folder>?<change-dir><kill-line>imaps://redondos@imap.gmail.com:993/<enter>'		'account: redondos@gmail.com'
+# --- Reload config 2 -------------------------------------------------------------------
+# macro generic        ,sm    ":source $HOME/.mutt/muttrc\r"
+# macro generic        \cj    "!rxvt -bg wheat -e joe $HOME/.muttrc\r"
+# ---------------------------------------------------------------------------------------
 
-
-# Load the inbox
-macro index,pager 'I'	'<change-folder>!<enter>' 'load the inbox'
-
-## Sendmail
-# macro index,pager,compose ',S' '<enter-command> set sendmail="/usr/bin/msmtp" sendmail<enter>' 'sendmail: msmtprc'
-macro index,pager,compose ',S' '<enter-command> set sendmail="$HOME/.mutt/scripts/msmtpqueue/msmtp-enqueue.sh" sendmail<enter>' 'sendmail: msmtprc'
-macro index,pager,compose ',s' '<enter-command> set sendmail="/usr/bin/msmtp -C /home/redondos/.msmtprc.localhost" sendmail<enter>' 'sendmail: msmtprc.localhost'
-
-## Search mail
-# Mairix
-macro index,pager ,f "<shell-escape>ssh twat.com.ar mairix " "search via mairix"
-# Namazu/nmzmail
-macro index,pager ,F "<shell-escape>nmzmail -r ~/.maildir/.Search<enter>" "search via nmzmail"
-# Load the results mailbox
-macro index,pager ,,f "<change-folder><kill-line>=Search<enter>" "load the search results mailbox"
-
-## Query commands
-# macro index,pager Q '<enter-command> set query_command="~/bin/muttquery.py %s"<enter><query>' 'Query KAddressBook'
-# macro index ,q '<enter-command> set query_command="~/bin/gmailcontacts.py -u redondos %s"<enter><query>' 'Query Gmail contacts'
-
-### Stolen from init0: http://phpfi.com/200883 ###
-
-## Show documentation
-macro index,pager <f8> "<enter-command> unset wait_key<enter>\
-<shell-escape> zless /usr/share/doc/mutt/manual.txt.gz<enter>\
-<enter-command> set wait_key<enter>" "Show Mutt documentation"
-
-## meta-b -> search body (~b)
-macro index \eb '/~b ' 'search in message bodies'
-
-## pager_index_lines on/off (f9 toggle)
-source ~/.mutt/sourced/macros.pager_index_lines-off
-
-## index_format (f6 toggle)
-## 2007-05-11: Now in folder-hooks
-# source ~/.mutt/sourced/macros.index_format-short
-
-## change subject (was: original subject)
-macro compose \es '<edit-subject>)<bol> (was: <bol>'
-
-## show attachments
-# macro index A '<enter-command>set index_format="%4C %Z%?y?@& ? %?X?%X& ? %{%b %d} %-20.20L %?M?(#%3M)&(%4c)? %s"<enter>' "Show attachment count"
-# macro index \ca '<enter-command>set index_format="%4C %Z%?y?@& ? %{%b %d} %-20.20L %?M?(#%3M)&(%4c)? %s"<enter>' "Hide attachment count"
-
-## find first new message
-macro index '\ef' '<first-entry><next-new><current-middle>' 'center first new message'
-
-## first/last entry in pager
-macro pager - <exit><first-entry><display-message> "goto first message"
-# macro pager <home> <exit><first-entry><display-message> "goto first message" 
-macro pager = <exit><last-entry><display-message "goto last message"
-# macro pager <end> <exit><last-entry><display-message "goto last message">
-
-## verify sig when c_v_s is off by default
-macro index ,p "<enter-command> set crypt_verify_sig<enter>\
-<display-message><enter-command> unset crypt_verify_sig<enter>" "verify pgp sig"
-macro pager ,p "<enter-command> set crypt_verify_sig<enter>\
-<exit><display-message><enter-command> unset crypt_verify_sig<enter>" "verify pgp sig"
-
-## Spell checker
-set my_aspell_en="/usr/bin/aspell -c --mode=email --lang=en_US"
-set my_aspell_es="/usr/bin/aspell -c --mode=email --lang=es"
-
-# English
-set ispell="$my_aspell_en"
-
-# Spanish
-macro compose I '<enter-command>set ispell="$my_aspell_es"<enter>\
-<ispell><enter-command>set ispell="$my_aspell_en"<enter>' "spanish aspell"
-
-## Mark all read
-macro index ,r '<tag-pattern>.<enter><tag-prefix-cond><clear-flag>N\
-<untag-pattern>.<enter><enter-command> set my_echo="All mail marked read"<enter>\
-<enter-command> set ?my_echo<enter>' "mark all read"
-
-## TOFU protection by t-prot
-macro index,pager	,t 	<enter-command>' unset display_filter;\
-set ?display_filter<enter>' "Turn TOFU protection off"
-macro index,pager	,T 	"<enter-command> set display_filter='t-prot $my_tprot';\
-set ?display_filter<enter>" "Turn TOFU protection on"
-
-## Reload config (f5)
-macro	index,pager,pager	<f5>	'<enter-command> set my_status="Reloaded configuration"; source ~/.mutt/muttrc; set ?my_status<enter>'	"reload muttrc"
-
-## gmane-find
-## Stefano Sabatini <stefano.sabatini-lala@poste.it>
-## <20070801230102.GA14547@santefisi.caos.org>
-# macro index,pager M "<pipe-message>gmane-find -tb<return>" \
-# 	"launch the browser to the corresponding G-mane archive page"
-
+# =======================================================================================

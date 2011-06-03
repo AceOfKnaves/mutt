@@ -1,2 +1,15 @@
-## Color switching: save default theme
-push "<shell-escape> rm ~/.mutt/themes.default; ln -s ~/.mutt/themes/$my_theme ~/.mutt/themes.default<enter>"
+# =======================================================================================
+#                   _   _
+#   _ __ ___  _   _| |_| |_ _ __ ___
+#  | '_ ` _ \| | | | __| __| '__/ __|
+#  | | | | | | |_| | |_| |_| | | (__
+#  |_| |_| |_|\__,_|\__|\__|_|  \___|
+# ---------------------------------------------------------------------------------------
+# Name: themes.set
+# Note: Color switching: save default theme
+# =======================================================================================
+
+# Color switching: save default theme
+  push "<shell-escape> rm ~/.mutt/themes.default; ln -s ~/.mutt/themes/$my_theme ~/.mutt/themes.default<enter>"
+
+# =======================================================================================

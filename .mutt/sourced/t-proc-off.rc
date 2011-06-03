@@ -1,0 +1,3 @@
+  set my_echo = "TOFU protection is on"
+  macro pager   \cw "<enter-command>unset display_filter;exec exit<enter><enter-command>exec display-message<enter><enter-command>source ~/.mutt/sourced/t-proc-on.rc<enter><enter-command>set ?my_echo<enter>"
+  macro generic \cw "<enter-command>unset display_filter<enter><enter-command>source ~/.mutt/sourced/t-proc-on.rc<enter><enter-command>set ?my_echo<enter>"

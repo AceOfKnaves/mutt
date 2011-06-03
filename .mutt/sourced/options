@@ -1,19 +1,52 @@
-# -*- muttrc -*-
-#
-# Options
-#
+# =======================================================================================
+#                   _   _
+#   _ __ ___  _   _| |_| |_ _ __ ___
+#  | '_ ` _ \| | | | __| __| '__/ __|
+#  | | | | | | |_| | |_| |_| | | (__
+#  |_| |_| |_|\__,_|\__|\__|_|  \___|
+#----------------------------------------------------------------------------------------
+# Name: options
+# Note: Options
+# =======================================================================================
 
-set move=no				# Don't move to mbox folder
-set noconfirmappend			# Just append, don't hassle me.
-set copy				# Save copies of outgoing messages
-set record==Sent			# Save outgoing messages to folder
-set delete=ask-yes			# Ask before deleting, preselecting 'yes'
-# set implicit_autoview=yes		# Autoview every MIME type with a copiousoutput entry in mailcap.
-set alias_file=~/.mutt/aliases
-set forward_edit=ask-no
-set text_flowed				# Enable format=flowed for text/plain.
-set hdrs=yes				# Enable my_hdr fields
-set use_envelope_from=yes		# 
-# set envelope_from			# To let mutt choose msmtp account.
-set print_command="muttprint"
+# --- Caching ---------------------------------------------------------------------------
+  set header_cache = "~/.Mail/cache/header_cache"
+  set message_cachedir = "~/.Mail/cache/body_cache"
+  set maildir_header_cache_verify = yes
+  set maildir_trash = no
 
+# --- Mask ------------------------------------------------------------------------------
+# set mask = "!^\.[^.]"
+  set my_mask = $mask
+
+# --- NNTP ------------------------------------------------------------------------------
+# set news_server = "news.gmane.org"
+# set news_cache_dir = "~/.Mail/cache/news"       # nije podrzano u novoj verziji
+# ---------------------------------------------------------------------------------------
+
+  set move = no                  # Don't move read messages to mbox folder
+  set delete = ask-no            # Ask before deleting, preselecting 'yes'
+  set noconfirmappend            # Just append, don't hassle me.
+# set implicit_autoview = yes    # Autoview every MIME type with a copiousoutput entry in mailcap.
+
+  set nobeep
+  set beep_new
+
+  set mark_old = no
+
+  set quit = ask-no
+
+  set query_command = "lbdbq '%s'"
+
+# ovo sluzi da uvek prikazuje sve mailboxove koje imaju novu postu
+  unset mail_check_recent
+
+# --- Slanje ----------------------------------------------------------------------------
+# unset sendmail = "/usr/bin/msmtp"  # koristim msmtp za slanje
+  set use_from = yes
+  set envelope_from = yes            # ovo je da msmtp provali sta da stavi u from
+  set copy                           # save copies of outgoing messages
+  set forward_edit = ask-no
+# ---------------------------------------------------------------------------------------
+
+# =======================================================================================

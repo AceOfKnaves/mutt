@@ -1,19 +1,149 @@
-# GnuPG config
-set pgp_decode_command="gpg %?p?--passphrase-fd 0? --no-verbose --batch --output - %f"
-set pgp_verify_command="gpg --no-verbose --batch --output - --verify %s %f"
-set pgp_decrypt_command="gpg --passphrase-fd 0 --no-verbose --batch --output - %f"
-set pgp_sign_command="gpg --no-verbose --batch --output - --passphrase-fd 0 --armor --detach-sign --textmode %?a?-u %a? %f"
-set pgp_clearsign_command="gpg --no-verbose --batch --output - --passphrase-fd 0 --armor --textmode --clearsign %?a?-u %a? %f"
-set pgp_encrypt_only_command="/usr/lib/mutt/pgpewrap gpg --batch --quiet --no-verbose --output - --encrypt --textmode --armor --always-trust --encrypt-to 0xCDB98F72 -- -r %r -- %f"
-set pgp_encrypt_sign_command="/usr/lib/mutt/pgpewrap gpg --passphrase-fd 0 --batch --quiet --no-verbose --textmode --output - --encrypt --sign %?a?-u %a? --armor --always-trust --encrypt-to 0xCDB98F72 -- -r %r -- %f"
-set pgp_import_command="gpg --no-verbose --import -v %f"
-set pgp_export_command="gpg --no-verbose --export --armor %r"
-set pgp_verify_key_command="gpg --no-verbose --batch --fingerprint --check-sigs %r"
-set pgp_list_pubring_command="gpg --no-verbose --batch --with-colons --list-keys %r" 
-set pgp_list_secring_command="gpg --no-verbose --batch --with-colons --list-secret-keys %r" 
-set pgp_autosign=yes
-set pgp_sign_as=0xCDB98F72
-set pgp_replyencrypt=yes
-set pgp_timeout=3600
-set pgp_good_sign="^gpg: Good signature from"
-# set pgp_use_gpg_agent=yes
+# =======================================================================================
+#                   _   _
+#   _ __ ___  _   _| |_| |_ _ __ ___
+#  | '_ ` _ \| | | | __| __| '__/ __|
+#  | | | | | | |_| | |_| |_| | | (__
+#  |_| |_| |_|\__,_|\__|\__|_|  \___|
+# ---------------------------------------------------------------------------------------
+# Name: gpg
+# Note: podrska za GnuPG
+# =======================================================================================
+
+# === CRYPTO STUFF ======================================================================
+  set pgp_decode_command       = "gpg --no-verbose --batch %?p?--passphrase-fd 0? --output - %f"
+  set pgp_verify_command       = "gpg --no-verbose --batch --output - --verify %s %f"
+  set pgp_decrypt_command      = "gpg --no-verbose --batch --passphrase-fd 0 --output - %f"
+  set pgp_sign_command         = "gpg --no-verbose --batch --output - --passphrase-fd 0 --armor --detach-sign --textmode %?a?-u %a? %f"
+  set pgp_clearsign_command    = "gpg --no-verbose --batch --output - --passphrase-fd 0 --armor --textmode --clearsign %?a?-u %a? %f"
+  set pgp_verify_key_command   = "gpg --no-verbose --batch --fingerprint --check-sigs %r"
+  set pgp_list_pubring_command = "gpg --no-verbose --batch --with-colons --list-keys %r" 
+  set pgp_list_secring_command = "gpg --no-verbose --batch --with-colons --list-secret-keys %r" 
+  set pgp_import_command       = "gpg --no-verbose --import -v %f"
+  set pgp_export_command       = "gpg --no-verbose --export --armor %r"
+ 
+  set pgp_encrypt_only_command = "pgpewrap gpg --batch --quiet --no-verbose --output - --encrypt --textmode --armor --always-trust --encrypt-to 0x00000000 -- -r %r -- %f"
+  set pgp_encrypt_sign_command = "pgpewrap gpg --passphrase-fd 0 --batch --quiet --no-verbose --textmode --output - --encrypt --sign %?a?-u %a? --armor --always-trust --encrypt-to 0x00000000 -- -r %r -- %f"
+ 
+# specify the uid to use when encrypting/signing
+  set pgp_sign_as=0x00000000
+
+# this set the number of seconds to keep in memory the passpharse used to encrypt/sign
+# the more the less secure it will be
+  set pgp_timeout = 60
+
+# it's a regexp used against the GPG output: if it matches some line of the output
+# then mutt considers the message a good signed one (ignoring the GPG exit code)
+  set pgp_good_sign = "^gpg: Good signature from"
+
+# mutt uses by default PGP/GPG to sign/encrypt messages
+# if you want to use S-mime instead set the smime_is_default variable to yes
+  unset smime_is_default
+
+# automatically sign all outcoming messages
+  unset crypt_autosign
+# sign only replies to signed messages
+  set crypt_replysign
+
+# automatically encrypt outcoming messages
+  unset crypt_autoencrypt
+# encrypt only replies to signed messages
+  set crypt_replyencrypt = yes
+# encrypt and sign replies to encrypted messages
+  set crypt_replysignencrypted = yes
+
+# automatically verify the sign of a message when opened
+ set crypt_verify_sig = yes
+
+# === MACROS ============================================================================
+# NOTE: The following macros let you force the variable value of crypt_verify_sig to yes
+# in order to get mutt verify the message, and then restore the previous value.
+# =======================================================================================
+
+macro index ,,v "<enter-command>set my_crypt_verify_sig=\$crypt_verify_sig<enter><enter-command>set crypt_verify_sig=yes<enter><display-message><enter-command>set crypt_verify_sig=\$my_crypt_verify_sig<enter>" 'Verify PGP signature and open the message'
+macro pager ,,v "<exit><enter-command>set my_crypt_verify_sig=\$crypt_verify_sig<enter><enter-command>set crypt_verify_sig=yes<enter><display-message><enter-command>set crypt_verify_sig=\$my_crypt_verify_sig<enter>" 'Verify PGP signature'
+
+# =======================================================================================
+
+
+# =======================================================================================
+# NOTE: ovo dole su makroi sa:
+# http://linuxdoc.org/HOWTO/Mutt-GnuPG-PGP-HOWTO.html
+# =======================================================================================
+# 
+# keyboard configuration file for Mutt-i copied modified and translated from the original
+#
+################################################################
+# The ultimative Key-Bindings for Mutt                         #
+#                                                              #
+# (c) 1997-1999 Roland Rosenfeld <roland@spinnaker.rhein.de>   #
+#                                                              #
+# $ Id: keybind,v 1.36 1999/02/20 19:36:28 roland Exp roland $ #
+################################################################
+
+# Generic keybindings
+# (for all the Mutt menus, except the pager!)
+# With the next three we can change the encrypting default selected software:
+
+# <ESC>1 to use GnuPG
+# macro   generic \e1     ":set pgp_default_version=gpg ?pgp_default_version\n"\
+# "Switch to GNU-PG"
+
+# <ESC>2 to use PGP2
+# macro   generic \e2     ":set pgp_default_version=pgp2 ?pgp_default_version\n"\ 
+# "Switch to PGP 2.*" 
+
+# <ESC>5 to use PGP5
+# macro   generic \e5     ":set pgp_default_version=pgp5 ?pgp_default_version\n"\
+# "Switch to PGP 5.*"
+
+# NOTE: Be careful with the last backspace at the end of the previous
+# macros. If you write that line and the next in the same line, do not write it.
+
+# index, OpMain, MENU_MAIN
+# (Main menu)
+# The next macro only runs from the main menu (the one that appears when
+# you starts Mutt). The keys <CTRL>K permit us to extract the public keys
+# from a message if it has (this is known because it has the K letter in
+# the message line):
+
+# macro  pager   \Ck     ":set pipe_decode pgp_key_version=pgp2\n\e\ek:set pgp_key_version=pgp5\n\e\ek:set pgp_key_version=gpg\n\e\ek:set pgp_key_version=default nopipe_decode\n"\ "Extract PGP keys to PGP2, PGP 5, and GnuPG keyrings"
+
+
+# pager, OpPager, MENU_PAGER
+# (Pager menu)
+# It permits the same operations that previous, with the same key combinations,
+# but in this case from the pager menu:
+
+# macro   pager   \e1     ":set pgp_default_version=gpg ?pgp_default_version\n"\
+# "switch to GNUPG"
+# 
+# macro   pager   \e2     ":set pgp_default_version=pgp2 ?pgp_default_version\n"\
+# "switch to PGP 2.*"
+# 
+# macro   pager   \e5     ":set pgp_default_version=pgp5 ?pgp_default_version\n"\
+# "switch to PGP 5.*"
+# 
+
+# compose, OpCompose+OpGerneric, MENU_COMPOSE
+# (Compose menu)
+# The next operations are used from the compose menu.
+# That is, after you have composed your message and you close it to send it,
+# just before pressing the "Y" key that allows us to send it to the MTA.
+
+# In this case, we create a menu that appears when you press "P".
+# The options in this menu are going to be bound to MENU_PGP. This are the
+# main use options (encryption and signing).
+
+# bind    compose p       pgp-menu
+
+# As many programs can't use PGP/MIME (especially from M$), the <CTRL>P key
+# will allow us to sign "as in the old times" (Application/PGP):
+
+# macro   compose \CP     "Fgpg --clearsign\ny"
+
+# The next, <CTRL>S will allow us to sign using PGP/MIME with the private key
+# that we have defined as default. This macro is not necesary, as we can
+# do the same from the "P" menu:
+# macro   compose \CS     "Fgpg --clearsign\ny^T^Uapplication/pgp; format=text; x-action=sign\n"
+
+# =======================================================================================

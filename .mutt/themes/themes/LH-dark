@@ -1,0 +1,80 @@
+# ---------------------------------------------------------------------------------------
+  color normal            yellow		  black 
+  
+  color hdrdefault        green           black
+  color header            green           black ^(From|Subject):
+  color signature         green           black	  # signatures in mail bodies
+# color indicator         black           yellow
+# color indicator         brightyellow    red
+  color indicator         white           red
+  color error             brightyellow    red	  # error messages
+  color message           cyan     		  black	  # normal messages
+  color tree              cyan            black   # the thread tree in the index menu
+  color status            black           blue    # frame
+  color tilde             magenta         black
+  color markers           cyan            black
+  color attachment        brightmagenta   black
+  color search            black           green   # how to hilite searches in the pager
+  color underline         brightgreen     black
+  
+# --- quoted text -----------------------------------------------------------------------
+  color quoted            blue            black  
+  color quoted1           magenta         black
+  color quoted2           red             black
+  color quoted3           green           black
+  color quoted4           cyan            black
+  color quoted5           blue            black
+  color quoted6           magenta         black
+  color quoted7           red             black
+  color quoted8           green           black
+  color quoted9           cyan            black
+
+# --- point out URL's -------------------------------------------------------------------
+  color body              cyan			  black "((ftp|http|https)://|(file|news):|www\\.)[-a-z0-9_.:]*[a-z0-9](/[^][{} \t\n\r\"<>()]*[^][{} \t\n\r\"<>().,:!])?/?"
+  color body              brightyellow	  black [-a-z_0-9.]+@[-a-z_0-9.]+    # e-mail addresses
+
+# --- smilies and the like --------------------------------------------------------------
+  color body              brightgreen	  black "<[Gg]>"
+  color body              brightgreen	  black "<[Bb][Gg]>"
+# see also the variables smileys
+  color body              yellow		  black ">?[;:][-^]?[][)(><}{|/DP][)}]*"
+
+# --- Index Colors ----------------------------------------------------------------------
+ color index    green			black '~g'  # gpg signed
+ color index    brightblue 		black '~G'  # gpg encrypted
+ color index    brightcyan		black '~F'  # Flagged
+ color index    brightyellow	black '~T'  # Tagged
+#color index    white			white '~f MAILER-DAEMON@*'
+#color index    white			white '~f Mailer-Daemon@*'
+ color index	brightgreen		black '~O'  # Unread
+ color index    brightgreen		black '~N'  # New
+ color index    brightred		black '~D'  # Deleted
+
+# --- Mono ------------------------------------------------------------------------------
+  mono normal             none            # normal text
+  mono indicator          reverse         # actual message
+  mono tree               none            # thread arrows
+  mono status             reverse         # status line
+# mono error              bold
+  mono error              standout
+  mono message            none            # info messages
+  mono quoted             bold
+  mono signature          none
+  mono attachment         underline       # MIME attachments
+  mono search             reverse         # search matches
+  mono tilde              none            # ~ at bottom of msg
+  mono markers            bold            # + at beginning of wrapped lines
+  mono hdrdefault         none            # default header lines
+  mono bold               bold            # hilite bold patterns in body
+  mono underline          underline       # hilite underlined patterns in body
+  mono header             bold           "^(from|subject):"
+  mono body               underline      "((ftp|http|https)://|(file|news):|www\\.)[-a-z0-9_.:]*[a-z0-9](/[^][{} \t\n\r\"<>()]*[^][{} \t\n\r\"<>().,:!])?/?"
+  mono body               underline      "[-a-z_0-9.]+@[-a-z_0-9.]+"
+  mono body               bold           "(^| )\\*[-a-z0-9äöüß*]+\\*[,.?]?[ \n]"
+  mono body               underline      "(^| )_[-a-z0-9äöüß_]+_[,.?]?[ \n]"
+
+
+# attributes when using a mono terminal
+# mono quoted bold
+
+# ---------------------------------------------------------------------------------------

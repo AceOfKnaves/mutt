@@ -1,0 +1,32 @@
+#!/bin/bash
+# =======================================================================================
+# NAME: dyn_pager_index_lines
+# DESC: skripta dinamicni pomera pager_index_lines u mutt-u pozivanjem makroa
+# ---------------------------------------------------------------------------------------
+# TODO; dodati mogucnost da skripta sama provali koliko terminal ima redova i namesti max
+# =======================================================================================
+
+# =======================================================================================
+default=10
+min=1
+max=63
+conf_file=~/.mutt/var/pager_index_lines
+
+[[ ! -f $conf_file ]] && ( echo $default > $conf_file || echo "ERROR, can't write: $conf_file" >&2 )
+lines=$(cat $conf_file)
+
+if   [[ $# -gt 0 ]] && [[ $1 == "inc" ]];then
+    let lines=$(( $lines + 1 ))
+elif [[ $# -gt 0 ]] && [[ $1 == "dec" ]];then
+    let lines=$(( $lines - 1 ))
+fi
+
+if   [[ $lines -lt $min ]];then
+    lines=$min
+elif [[ $lines -gt $max ]];then
+    lines=$max
+fi
+    
+echo $lines > $conf_file
+echo -n $lines
+# =======================================================================================

@@ -1,5 +1,18 @@
-set my_theme=`ls ~/.mutt/themes | randomize | head -1`
-# source ~/.mutt/uncolor
-uncolor index *
-source ~/.mutt/themes/$my_theme
-set ?my_theme
+# =======================================================================================
+#                   _   _
+#   _ __ ___  _   _| |_| |_ _ __ ___
+#  | '_ ` _ \| | | | __| __| '__/ __|
+#  | | | | | | |_| | |_| |_| | | (__
+#  |_| |_| |_|\__,_|\__|\__|_|  \___|
+# ---------------------------------------------------------------------------------------
+# Name: themes.random
+# Note: Set random theme
+# =======================================================================================
+
+  set my_theme = `ls ~/.mutt/themes/themes | randomize | head -1`
+  source "~/.mutt/bin/uncolor"
+  uncolor index *
+  source "~/.mutt/themes/themes/$my_theme"
+  set ?my_theme
+
+# =======================================================================================

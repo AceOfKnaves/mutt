@@ -1,0 +1,2 @@
+#!/bin/bash
+echo -n $(grep "side_width" ~/.mutt/var/sidebar_conf | sed  's/side_width="\(.*\)"/\1/')

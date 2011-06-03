@@ -1,0 +1,4 @@
+  set my_echo = "TOFU protection is off"
+  macro pager   \cw "<enter-command>set display_filter='t-prot -acelmtS -Mmutt --spass -L$HOME/.Mail/t-prot/mlfooters -A$HOME/.Mail/t-prot/adfooters';exec exit<enter><enter-command>exec display-message<enter><enter-command>source ~/.mutt/sourced/t-proc-off.rc<enter><enter-command>set ?my_echo<enter>"
+  macro generic \cw "<enter-command>set display_filter='t-prot -acelmtS -Mmutt --spass -L$HOME/.Mail/t-prot/mlfooters -A$HOME/.Mail/t-prot/adfooters'<enter><enter-command>source ~/.mutt/sourced/t-proc-off.rc<enter><enter-command>set ?my_echo<enter>"
+

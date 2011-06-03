@@ -1,0 +1,215 @@
+#!/bin/bash
+# =======================================================================================
+# NAME:  dyn_index_format
+# NOTE:  ova skripta dinamicki generise index_format za mutt i podesava sidebar status
+#        i njegovu velicinu
+# ---------------------------------------------------------------------------------------
+# REQS:  mutt, sidebar-patch, unicode terminal
+# ---------------------------------------------------------------------------------------
+# TODO:  napraviti da radi i bez UTF-8
+# ---------------------------------------------------------------------------------------
+# USAGE: podesiti makro u configu da radi ovo ovako:
+# macro index,pager \CL     "<enter-command> set index_format=\"\`~/.mutt/bin/dyn_index_format toggle\`\"<enter><enter-command> set sidebar_width=\"\`~/.mutt/bin/tell_side_width\`\"<enter><enter-command> set sidebar_visible=\"\`~/.mutt/bin/tell_side_status\`\"<enter><enter-command> set ?sidebar_visible<enter>" "Toggle Sidebar"
+# macro index,pager <left>  "<enter-command> set index_format=\"\`~/.mutt/bin/dyn_index_format dec\`\"<enter><enter-command> set sidebar_width=\"\`~/.mutt/bin/tell_side_width\`\"<enter><enter-command> set sidebar_visible=\"\`~/.mutt/bin/tell_side_status\`\"<enter><enter-command> set ?sidebar_width<enter>"        "Decrease sidebar width"
+# macro index,pager <right> "<enter-command> set index_format=\"\`~/.mutt/bin/dyn_index_format inc\`\"<enter><enter-command> set sidebar_width=\"\`~/.mutt/bin/tell_side_width\`\"<enter><enter-command> set sidebar_visible=\"\`~/.mutt/bin/tell_side_status\`\"<enter><enter-command> set ?sidebar_width<enter>"        "Increase sidebar width"
+# ---------------------------------------------------------------------------------------
+# BUGS:  postoji bug u sidebaru da pukne kada se sidebar previse smanji, nisam siguran
+#        kako radi
+# =======================================================================================
+
+# === FUNCTIONS =========================================================================
+function write_conf() {
+    echo "#!/bin/bash" > $conf_file || echo "ERROR,cannot write to: $conf_file" >&2
+    echo "side_width=\"$1\""  >> $conf_file 
+    echo "side_status=\"$2\"" >> $conf_file
+    echo "side_max_w=\"$3\""  >> $conf_file
+    echo "side_min_w=\"$4\""  >> $conf_file
+}
+# === ENC-FUNCTIONS =====================================================================
+
+# === SIDEBAR ===========================================================================
+# --- Command line arguments ------------------------------------------------------------
+if [[ $# -gt 0 ]]; then
+    [[ $1 == "toggle" ]] && side_toggle="1"
+    [[ $1 == "inc"    ]] && side_inc="1"
+    [[ $1 == "dec"    ]] && side_dec="1"
+# --- Defaults --------------------------------------------------------------------------
+    conf_file=~/.mutt/var/sidebar_conf
+      
+    def_width="30"
+    def_status="0"
+    def_max_w="80"
+    def_min_w="15"    # ovo ne sme manje, ima bug u sidebaru
+# --- Read config file and set values ---------------------------------------------------
+    [[ ! -e $conf_file ]] && write_conf $def_width $def_status $def_max_w $def_min_w
+
+    source $conf_file
+
+    [[ ! -n $side_width  ]] && side_width=$def_width   && echo "side_width=\"${def_width}\""   >> $conf_file
+    [[ ! -n $side_status ]] && side_status=$def_status && echo "side_status=\"${def_status}\"" >> $conf_file
+    [[ ! -n $side_max_w  ]] && side_max_w=$def_max_w   && echo "side_max_w=\"${def_max_w}\""   >> $conf_file
+    [[ ! -n $side_min_w  ]] && side_min_w=$def_min_w   && echo "side_min_w=\"${def_min_w}\""   >> $conf_file
+# --- Toggle sidebar? -------------------------------------------------------------------
+    if [[ $side_toggle -ne 0 ]]; then
+          [[ $side_status -eq 0 ]] && side_status="1" || side_status="0"
+    fi
+# --- Increase/Decrease sidebar? --------------------------------------------------------
+    if [[ $side_status -ne 0 ]];then
+        if [[ $side_inc -ne 0 ]];then
+            let side_width=$(( $side_width + 1 ))
+        elif [[ $side_dec -ne 0 ]];then
+            let side_width=$(( $side_width - 1 ))
+        fi
+
+        if   [[ $side_width -lt $side_min_w ]];then
+            side_width=$side_min_w
+        elif [[ $side_width -gt $side_max_w ]];then
+            side_width=$side_max_w
+        fi
+    
+    fi
+# --- Write conf_file -------------------------------------------------------------------
+  write_conf $side_width $side_status $side_max_w $side_min_w
+# ---------------------------------------------------------------------------------------
+else
+    side_status="0"
+fi
+# ---------------------------------------------------------------------------------------
+# clean-up a bit:
+  unset -f write_conf
+# unset -v side_width side_max_w side_min_w
+# unset -v def_width def_max_w def_min_w def_status
+# === END-SIDEBAR =======================================================================
+
+# === INDEX_FORMAT ======================================================================
+  block[1]=" %Z"                            # len =  4
+  block[2]="│ %-15.15n "                    # len = 18
+  block[3]="│%?M?(%3.M)&%2.2e/%-2.2E?"        # len =  6
+  block[5]="%> "                            # len =  0
+  block[6]="┆ %?y?%-10.10y &           ?"    # len = 13
+  block[7]="│ %-25.25a "                    # len = 28
+  block[8]="│ %[%d.%b.%y %H:%M] "            # len = 18
+
+  [[ $side_status -eq 0 ]] && side_width="0"
+
+  let width=$(( $(tput cols) - $side_width ))
+  let lenS=$(($width - 90))
+
+if [[ $width -lt 160 ]]; then
+    block[7]=""                    # skinem email adresu (-28)
+    let lenS=$(($lenS + 28))
+    if [[ $width -lt 132 ]]; then
+        block[8]="│%[%d.%b.%y] "    # smanjim vreme (-7)
+        let lenS=$(($lenS + 7))
+        if [[ $width -lt 125 ]]; then
+            block[2]="│%-8.8v"            # smanjim name (-9)
+            let lenS=$(($lenS + 9))
+            if [[ $width -lt 116 ]]; then
+                block[6]=""                    # skinem X-Label (-13)
+                let lenS=$(($lenS + 13))
+                if [[ $width -lt 103 ]]; then
+                    block[3]="│%?M?%3.M&   ?"    # smanjim broj poruka (-2)
+                    let lenS=$(($lenS + 2))
+                fi
+            fi
+        fi
+    fi
+fi
+
+  block[4]="┃ %-${lenS}.${lenS}s "            # len=3 + $lenS
+
+  for i in {1..8}; do echo -n "${block[$i]}"; done
+
+# =======================================================================================
+# ovo je minimum sto mora da ima (len=80):
+# echo -n "%Z│%-8.8v│%?M?%3.M&   ?┃ %-50.50s %> │%[%d.%b.%y] "
+# ---------------------------------------------------------------------------------------
+# ovo je default:
+# echo -n "%4C %Z %{%b %d} %-15.15L (%4l) %s"
+# =======================================================================================
+
+# =======================================================================================
+#  index_format
+# ---------------------------------------------------------------------------------------
+#  Type:    string
+#  Default: "%4C %Z %{%b %d} %-15.15L (%4l) %s"
+# ---------------------------------------------------------------------------------------
+#  "Format strings" are similar to the strings used in the "C" function printf
+#  to format output (see the man page for more detail). The following sequences
+#  are defined in Mutt:
+# =======================================================================================
+#  %a    address of the author
+#  %f    entire From: line (address + real name)
+#  %n    author's real name (or address if missing)
+#  %u    user (login) name of the author
+#  %v    first name of the author, or the recipient if the message is from you
+#  %F    author name, or recipient name if the message is from you
+# ---------------------------------------------------------------------------------------
+#  %B    the list to which the letter was sent, or else the folder name (%b).
+#  %t    `to:' field (recipients)
+#  %L    If an address in the To or CC header field matches an address defined by
+#           the users "lists" command, this displays "To <list-name>", otherwise
+#           the %same as %F.
+# ---------------------------------------------------------------------------------------
+#  %b    filename of the original message folder (think mailBox)
+#  %O    (_O_riginal save folder) Where mutt would formerly have stashed the
+#        message: list name or recipient name if no list
+# ---------------------------------------------------------------------------------------
+#  %i    message-id of the current message
+#  %N    message score
+# ---------------------------------------------------------------------------------------
+#  %c    number of characters (bytes) in the message
+#  %l    number of lines in the message
+# ---------------------------------------------------------------------------------------
+#  %C    current message number
+#  %m    total number of message in the mailbox
+#  %e    current message number in thread
+#  %E    number of messages in current thread
+#  %M    number of hidden messages if the thread is collapsed.
+# ---------------------------------------------------------------------------------------
+#  %d    date and time of the message in the format specified by "date_format"
+#           converted to sender's time zone
+#  %D    date and time of the message in the format specified by "date_format"
+#           converted to the local time zone
+#  %{fmt} the date and time of the message is converted to sender's time zone,
+#            and "fmt" is expanded by the library function "strftime"; a
+#            leading bang disables locales
+#  %[fmt] the date and time of the message is converted to the local time zone,
+#            and "fmt" is expanded by the library function "strftime"; a
+#            leading bang disables locales
+#  %(fmt) the local date and time when the message was received. "fmt" is expanded
+#         by the library function "strftime"; a leading bang disables locales
+#  %<fmt> the current local time. "fmt" is expanded by the library function
+#         "strftime"; a leading bang disables locales.
+# ---------------------------------------------------------------------------------------
+#  %s    subject of the message
+# ---------------------------------------------------------------------------------------
+#  %Z    message status flags
+#  %S    status of the message (N/D/d/!/r/*)
+#  %T    the appropriate character from the $to_chars string
+# ---------------------------------------------------------------------------------------
+#  %y    `x-label:' field, if present
+#  %Y    `x-label' field, if present, and (1) not at part of a thread tree, (2) at
+#            the top of a thread, or (3) `x-label' is different from preceding
+#            message's %`x-label'.
+# ---------------------------------------------------------------------------------------
+#  %>X    right justify the rest of the string and pad with character "X"
+#  %|X    pad to the end of the line with character "X"
+# =======================================================================================
+
+# =======================================================================================
+#  See also: "$to_chars".
+# =======================================================================================
+
+# =======================================================================================
+# Additionally you can switch between two strings, the first one, if a value is
+# zero, the second one, if the value is nonzero, by using the following
+# construct: %?<sequence_char>?<if_string>&<else_string>?
+# =======================================================================================
+
+# =======================================================================================
+# You can additionally force the result of any printf-like sequence to be
+# lowercase by prefixing the sequence character with an underscore (_) sign.
+# For example, if you want to display the local hostname in lowercase, you
+# would use: %_h
+# =======================================================================================

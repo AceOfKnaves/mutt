@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# $1 is the action (append, show, remove)
+# $2 is the filename
+
+# Configuration
+LFILE="$HOME/.mutt/var/labels"
+
+ACTION="$1"
+FNAME="$2"
+echo $FNAME
+NFNAME="/tmp/editlabels-`basename "$2"`.$$"
+
+function asklabel() {
+	echo "----------------------------------------"
+	echo "AVAILABLE LABELS:"
+	echo "^^^^^^^^^^^^^^^^ "
+	cat $LFILE
+	echo "----------------------------------------"
+
+	read -e -p "Insert label: " $1
+
+	LNAME=`grep "${!1}" -i $LFILE | head -1`
+	echo "Pronadjeno: $LNAME"
+
+	while ( ! grep -q "^$LNAME$" "$LFILE" ) || ( [ "$LNAME" == "" ] ) ; do
+		echo "Invalid label \"${!1}\""
+		read -e -p "Insert label: " $1
+		LNAME=`grep "${!1}" -i $LFILE | head -1`
+		echo "Pronadjeno: $LNAME"
+	done
+}
+
+if [ "$ACTION" == "menu" ]; then
+	function getact() {
+		read -p "(A)ppend/(R)emove/(S)how/(C)lean/(L)ist: " ACT
+		if [ "$ACT" == "a" ] || [ "$ACT" == "append" ] || [ "$ACT" == "Append" ]; then
+			ACTION=append
+		elif [ "$ACT" == "r" ] || [ "$ACT" == "remove" ] || [ "$ACT" == "Remove" ]; then
+			ACTION=remove
+		elif [ "$ACT" == "s" ] || [ "$ACT" == "show" ] || [ "$ACT" == "Show" ]; then
+			ACTION=show
+		elif [ "$ACT" == "c" ] || [ "$ACT" == "clean" ] || [ "$ACT" == "Clean" ]; then
+			ACTION=clean
+		elif [ "$ACT" == "l" ] || [ "$ACT" == "list" ] || [ "$ACT" == "List" ]; then
+			ACTION=list
+		else
+			echo "Invalid action"
+			getact
+		fi
+	}
+	getact
+fi
+
+
+if [ "$ACTION" == "append" ]; then
+	ACT=`formail -c -X X-Label < "$FNAME"`
+	asklabel LNAME
+	if [ "$ACT" == "" ]; then
+		NEW="X-Label: $LNAME"
+	else
+		NEW="$ACT, $LNAME"
+	fi
+
+	formail -I "$NEW" < "$FNAME" > "$NFNAME"
+
+elif [ "$ACTION" == "remove" ]; then
+	ACT=`formail -c -X X-Label < "$FNAME"`
+	asklabel LNAME
+	NEW=`echo $ACT | sed "s/, $LNAME//g" | sed "s/$LNAME, //g" | sed "s/: $LNAME/:/g"`
+	formail -I "$NEW" < "$FNAME" > "$NFNAME"
+
+elif [ "$ACTION" == "show" ]; then
+	formail -c -X "X-Label:" < "$FNAME"
+	read -p "Press any key to continue"
+
+elif [ "$ACTION" == "clean" ]; then
+	formail -I "X-Label:" < "$FNAME" > "$NFNAME"
+
+elif [ "$ACTION" == "list" ]; then
+	echo "Available labels (from $LFILE):"
+	cat $LFILE
+	read -p "Press any key to continue"
+fi
+
+
+# if we created a new file, step over the old one
+if [ -f "$NFNAME" ]; then
+	mv "$NFNAME" "$FNAME"
+fi
+#formail -s procmail < $NFNAME
+

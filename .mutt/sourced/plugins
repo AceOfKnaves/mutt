@@ -1,0 +1,45 @@
+# =======================================================================================
+#                   _   _
+#   _ __ ___  _   _| |_| |_ _ __ ___
+#  | '_ ` _ \| | | | __| __| '__/ __|
+#  | | | | | | |_| | |_| |_| | | (__
+#  |_| |_| |_|\__,_|\__|\__|_|  \___|
+#-----------------------------------------------------------------------------------------
+# Name: plugins
+# Note: Plugins
+# =======================================================================================
+
+# === T-PROT ============================================================================
+# $Id: muttrc.t-prot,v 1.9 2002/12/29 03:52:57 jochen Exp $
+# This all works only if you have mutt-1.3.12 or newer or if you use something like the
+# pagerfilter patch.
+# (http://www.escape.de/users/tolot/mutt/).
+
+  set display_filter = 't-prot -acelmtS -Mmutt --spass -L$HOME/.Mail/t-prot/mlfooters -A$HOME/.Mail/t-prot/adfooters'
+  source "~/.mutt/sourced/t-proc-off.rc"
+ 
+# --- Toggle TOFU protection with ESC-0 and ESC-1 ---------------------------------------
+# macro generic \e2 ":unset display_filter\n" "Turn TOFU protection off"
+# macro generic \e1 ":set display_filter='t-prot -acelmtS -Mmutt --spass -L$HOME/.Mail/t-prot/mlfooters -A$HOME/.Mail/t-prot/adfooters'\n" "Turn TOFU protection on"
+
+# --- Same in pager mode - ugly but what the hell... ------------------------------------
+# macro pager \e2 ":unset display_filter; exec exit\n:exec display-message\n" "Turn TOFU protection off"
+# macro pager \e1 ":set display_filter='t-prot -acelmtS -Mmutt --spass -L$HOME/.Mail/t-prot/mlfooters -A$HOME/.Mail/t-prot/adfooters'; exec exit\n:exec display-message\n" "Turn TOFU protection on"
+
+# --- Highlight TOFU protection ---------------------------------------------------------
+  color body	black  	yellow	"^\\[---.*"
+  color body	black	yellow	"^#v[-+]"
+# =======================================================================================
+
+# === NOTMUCH ===========================================================================
+  macro index <F8> \
+        "<enter-command>unset wait_key<enter><shell-escape>~/.mutt/bin/mutt-notmuch.sh --prompt search<enter><change-folder-readonly>~/.cache/mutt_results<enter>" \
+        "search mail (using notmuch)"
+  macro index <F9> \
+        "<enter-command>unset wait_key<enter><pipe-message>~/.mutt/bin/mutt-notmuch.sh thread<enter><change-folder-readonly>~/.cache/mutt_results<enter><enter-command>set wait_key<enter>" \
+        "search and reconstruct owning thread (using notmuch)"
+# =======================================================================================
+
+# === MUTTPROFILES ======================================================================
+  macro	index	<F1>	"!muttprofile\n:source ~/.mutt/sourced/profiles/profile.active\n<change-folder>=<tab><tab>" "Load profile"
+# =======================================================================================

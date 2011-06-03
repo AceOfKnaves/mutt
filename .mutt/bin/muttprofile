@@ -1,0 +1,518 @@
+#!/usr/bin/perl -w
+
+# =======================================================================================
+# muttprofile - choose mutt profile interactively
+# Copyright (C) 2000-2003 Martti Rahkila
+# http://www.iki.fi/martti.rahkila/mutt/
+# ---------------------------------------------------------------------------------------
+# 2000-05-10 v1.0.0
+# 2003-11-20 v1.0.1 three bugfixes
+# 2011-05-01 v1.0.2 formatiranje izmenjeno (djordje)
+# =======================================================================================
+
+# === DEFAULTS ==========================================================================
+my $mutt_path = "~/.mutt/sourced/profiles"; # directory for mutt files, change with option -d
+my $active_profile = "profile.active"; 		# symlink to the real profile, change with option -a
+my $profile_regexp = "/^\.[^.].*[^\~]\$/";   # default, change with option -p
+
+# --- Initialize ------------------------------------------------------------------------
+use strict;
+use Getopt::Long;   # for command line options
+use Term::Complete; # for interactive mode
+
+# --- Declarations ----------------------------------------------------------------------
+sub read_link; 		# returns name of the real active profile, otherwise false
+sub create_link; 	# the actual beef here, make a symlink and remove old one if needed
+sub expand_tilde; 	# if home directory was given with tilde, expands it to absolute path
+
+my %profiles;
+my %descriptions;
+
+# --- Versions --------------------------------------------------------------------------
+my $version = "1.0.2"; 	# major.minor.patchlevel
+my $license = "This program is free software; you can redistribute it and/or\nmodify it under the terms of the GNU General Public License\nas published by the Free Software Foundation; either version 2\nof the License, or (at your option) any later version.\n\nThis program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\nGNU General Public License for more details.\n(http://www.gnu.org/copyleft/gpl.html)";
+my $version_string = "muttprofile $version, (c) 2000-2003 Martti Rahkila\n\n$license\n";
+
+# --- Set return values -----------------------------------------------------------------
+my $ok = 0;
+my $already_active = 1;
+my $error = 2;
+
+# === MAIN ==============================================================================
+
+# --- Command line first ----------------------------------------------------------------
+my ($set_active_profile,$view_config,$set_mutt_directory,$help,$set_profiles,$view_source,$version_number,$version_long);
+
+Getopt::Long::Configure(qw/no_ignore_case/);
+
+# --- Command line options --------------------------------------------------------------
+unless (GetOptions( 
+	    "a=s"       => \$set_active_profile,
+	    "active=s"  => \$set_active_profile,
+	    "d=s"       => \$set_mutt_directory,
+	    "dir=s"     => \$set_mutt_directory,
+	    "h"         => \$help,
+	    "help"      => \$help,
+	    "p=s"       => \$set_profiles,
+	    "profile=s" => \$set_profiles,
+        "v"         => \$view_source,
+        "view"      => \$view_source,
+        "V"         => \$version_number,
+        "Version"   => \$version_long,
+        "version"   => \$version_long
+	    )
+) {
+    print STDERR "Invalid command line options. Exiting($error)\n";
+    exit($error);
+}
+
+my $input;
+my $found = 0;
+my $str ="";
+my $real_active_profile;
+
+# --- Help ------------------------------------------------------------------------------
+if ($help) {
+    print STDOUT <<EOF
+$version_string
+
+Usage: muttprofile [options] [profile_name]
+
+       -a --active  string         name for active profile symlink (default: profile.active)
+       -d --dir     directory      alternative mutt directory (default: ~/.mutt)
+       -h --help                   print this message
+       -p --profile list or regexp list of profiles or regular expression to match profiles
+                                   (default: profile.*)
+       -v --view                   view profile source instead of making it active
+       -V --version                print version information, use --version for long output
+
+       profile name                name for profile to load/view
+
+If no command line arguments are present or option -v|--view is used without arguments, 
+muttprofile starts in interactive mode.
+
+For details, please see perldoc -F $0
+EOF
+    ;
+    exit($ok);
+# --- Version ---------------------------------------------------------------------------
+} elsif ($version_number) {
+    print STDOUT "$version\n";
+    exit($ok);
+} elsif ($version_long) {
+    print STDOUT "$version_string\n";
+    exit($ok);
+}
+
+my $real_mutt_path;
+
+# --- Verify mutt directory settings ----------------------------------------------------
+if ($set_mutt_directory) {
+    # mutt_path is given in command line
+    $real_mutt_path = expand_tilde($set_mutt_directory);
+    # verify given mutt directory
+    unless (-d $real_mutt_path) {
+	print STDERR "Cannot find mutt directory ($set_mutt_directory). Exiting($error).\n";
+	exit($error);
+    }
+} else {
+    # we are using default mutt_path
+    $real_mutt_path = expand_tilde($mutt_path);
+    # verify default mutt directory
+    unless (-d $real_mutt_path) {
+	print STDERR "Cannot find default mutt directory ($mutt_path), Try option -d. Exiting($error).\n";
+	exit($error);
+    }
+}
+
+# --- Verify name for active profile symlink --------------------------------------------
+if ($set_active_profile) {
+    # name for active profile is given in command line
+    $active_profile = $set_active_profile;
+}
+if ((-e "$real_mutt_path/$active_profile") &&
+    !(-l "$real_mutt_path/$active_profile")) {
+    # the active profile exists but it is not a symlink
+	# print STDERR "Problem with name for active profile,
+	# try option -a or another name. Exiting($error).\n";
+    print STDERR "Problem with name for active profile ($real_mutt_path/$active_profile), Try option -a or another name. Exiting($error).\n";    
+    # in 1.0.0 the exit() here was missing...
+    exit($error);
+}
+
+if ($set_profiles) {
+    # profile regexp is given in command line
+    $profile_regexp = $set_profiles;
+}
+
+# --- Load profiles ---------------------------------------------------------------------
+my @files;
+opendir(DIR,$real_mutt_path);
+@files = grep { eval($profile_regexp) } readdir(DIR);
+closedir(DIR);
+
+#if (scalar(@files) == 0) {
+# ---
+# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=218957
+# ---
+if (scalar(@files) == 0 || ($#files == 0 && $files[0] eq $active_profile)) {
+    # regexp matches no files
+    print STDERR "No profiles found, try option -p or different regexp. Exiting($error).\n";
+    exit($error);
+}
+
+my $f;
+my $name;
+my $desc;
+
+foreach $f (@files) {
+    next if ($f eq $active_profile);
+    $name = "";
+    $desc = "";
+    open(FILE,"<$real_mutt_path/$f") || print STDERR "Cannot open $real_mutt_path/$f, skipping.\n";
+    while (<FILE>) {
+	if (/\#\s*NAME:\s*(.*)\s*$/i) {
+	    $name = $1;
+	    next;
+	}
+	if (/\#\s*DESC:\s*(.*)\s*$/i) {
+	    $desc = $1;
+	    next;
+	}
+    }
+    close(FILE);
+    $name = $f if ($name eq "");
+    $profiles{$name} = $f;
+    $descriptions{$name} = $desc;
+}
+
+# --- Do we want view_mode --------------------------------------------------------------
+my $view_mode = 0;
+if ($view_source) {
+    $view_mode = 1;
+}
+
+# --- Find active profile ---------------------------------------------------------------
+$real_active_profile = read_link($real_mutt_path,$active_profile);
+
+# do we have a profile name on the command line?
+if (@ARGV) {
+    $str = shift;
+    if (defined($profiles{$str})) {
+	$found = 1;
+
+	# we want to wiew source
+	if ($view_mode == 1) {
+	    open(FILE,"<$real_mutt_path/$profiles{$str}") || 
+		print STDERR "Cannot open profile $str.\n",exit($error);
+	    while (<FILE>) {
+		print STDOUT $_;
+	    }
+	    close(FILE);
+	    exit($ok);
+	}
+
+	if ($real_active_profile) {
+	    # symlink exists
+	    if ("$profiles{$str}" eq $real_active_profile) {
+		print STDOUT "Chosen profile ($profiles{$str}) is already active.\n";
+		exit($already_active);
+	    }
+	}
+	# create the link, remove old if needed
+	if (create_link($real_mutt_path,$active_profile,$profiles{$str})) {
+	    print STDOUT "New active profile: $profiles{$str}\n";
+	    exit($ok);
+	} else {
+	    # something wrong here
+	    print STDERR "Error creating symlink. Exiting($error).\n";
+	    exit($error);
+	}
+
+    } else {
+	print STDERR "Unknown profile ($str). Exiting($error).\n";
+	exit($error);
+    }
+}
+
+# --- Command line clear, going for interactive mode ------------------------------------
+my $prompt = "Profile name (tab to complete, * = active profile): ";
+
+my @list;
+my $plength = 0;
+my $dlength = 0;
+my $i = 0;
+my $k;
+
+foreach $k (keys %profiles) {
+    push(@list,$k);
+    $plength = length($k) if (length($k) > $plength);
+    $dlength = length($descriptions{$k}) if (length($descriptions{$k}) > $dlength);
+    $i++;
+}
+
+# --- Cutpoint for descriptions ---------------------------------------------------------
+my $max = length($prompt) + $plength;
+if ($max < 80) {
+    $max = 80;
+}
+
+# --- Output format ---------------------------------------------------------------------
+my $mark;
+my $format = "format STDOUT = \n"
+    . '^ ' . '^'  . '<' x ($plength - 1) . " ^" . '<' x ($max - $plength - 5) . '~~' . "\n"
+    . '$mark,$name,$desc' . "\n" . '.' . "\n";
+
+eval($format);
+
+print STDOUT "Available profiles ($i):\n";
+
+#foreach $k (keys %profiles) {
+# ---
+#http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=218960
+# ---
+foreach $k (sort keys %profiles) {
+    $mark = "";
+    $name = "";
+    $desc = "";
+    if ($real_active_profile eq $profiles{$k}) {
+	$mark = "*";
+    }
+    $name = $k;
+    $desc = $descriptions{$k} if ($descriptions{$k} ne '');
+    write STDOUT;
+}
+
+$found = 0;
+$str ="";
+
+# get the profile name
+$str = Complete($prompt,@list);
+
+# verify given profile name
+if ($str eq '') {
+    print STDERR "No profile chosen. Exiting($error).\n";
+    exit($error);
+}
+unless (defined($profiles{$str})) {
+    print STDERR "Unknown profile ($str). Exiting($error).\n";
+    exit($error);
+} else {
+    # we have a valid profile name
+
+    # we want to wiew source
+    if ($view_mode == 1) {
+	open(FILE,"<$real_mutt_path/$profiles{$str}") || 
+	    print STDERR "Cannot open profile $str. Exiting($error).\n",exit($error);
+	while (<FILE>) {
+	    print STDOUT $_;
+	}
+	close(FILE);
+	exit($ok);
+    }
+
+    if ($real_active_profile) {
+	# symlink exists
+	if ("$profiles{$str}" eq $real_active_profile) {
+	    print STDOUT "Chosen profile ($profiles{$str}) is already active.\n";
+	    exit($already_active);
+	}
+    }
+    # create the link, remove old if needed
+    if (create_link($real_mutt_path,$active_profile,$profiles{$str})) {
+	print STDOUT "New active profile: $profiles{$str}\n";
+	exit($ok);
+    } else {
+	# something wrong here
+	print STDERR "Error creating symlink. Exiting($error).\n";
+	exit($error);
+    }
+}
+    
+exit($ok);
+
+# --- Subs ------------------------------------------------------------------------------
+sub read_link {
+    my $real_mutt_path = shift;
+    my $active_profile = shift;
+    my $real_active_profile;
+
+    if (-l "$real_mutt_path/$active_profile") {
+	# symlink exists
+	$real_active_profile = readlink("$real_mutt_path/$active_profile");
+    } else {
+	# no symlink yet
+	$real_active_profile = 0;
+    }
+    return $real_active_profile;
+}
+
+sub create_link {
+    # the beef...
+    my $real_mutt_path = shift;
+    my $active_profile = shift;
+    my $profile = shift;
+    my $link;
+
+    chdir($real_mutt_path);
+    $link = read_link($real_mutt_path,$active_profile);
+    unlink($active_profile) if ($link);
+    if (symlink("$profile","$active_profile")) {
+	return 1;
+    } else {
+	return 0;
+    }
+}
+
+sub expand_tilde {
+    my $dir = shift;
+
+    # tilde expansion
+    if ($dir =~ /~/) {
+	$dir =~ s{ ^ ~( [^/]* ) }
+	{ $1 ? (getpwnam($1))[7] : ($ENV{'HOME'} || $ENV{'LOGDIR'} || (getpwuid($>))[7]) }ex;
+    }
+    return($dir);
+}
+
+# =======================================================================================
+
+# === DOCUMENTATION =====================================================================
+__END__
+
+=head1 NAME
+
+muttprofile - Choose a Mutt Profile
+
+=head1 SYNOPSIS
+
+B<muttprofile> [-a|--active string] [-d|--dir directory] [-h|--help] [-p|--profile regexp] [-v|--view] [-V|--Version] [profile]
+
+=head1 DESCRIPTION
+
+B<muttprofile> is a simple utility to choose a profile to be used with Mutt email-client.
+It has two operating modes: command-line and interactive. Muttprofile goes to interactive
+mode if no command-line arguments are present or option -v|--view is present without profile name.
+
+Muttprofile looks for profile files in the Mutt directory, opens them and looks for
+NAME and DESC definitions. It then creates a symbolic link to the profile chosen by the user. 
+The rest of the work is done with a Mutt macro.
+
+=head1 USAGE
+
+Interactive mode:
+
+Type the name of the profile and the program creates a symlink to load the profile.
+Press <tab> to complete, <ctrl-d> to see list of choices.
+
+Command-line options:
+
+B<-a | --active> Set the name for active profile symlink, default is profile.active
+
+B<-d | --dir> Set the Mutt directory, default is ~/.mutt
+
+B<-h | --help> prints a short help and exits
+
+B<-p | --profile> (Perl) Regexp to match profile files in Mutt directory
+
+B<-v | --view> Instead of creating a symlink, view profile contents
+
+B<-V | --version> prints the version information and exits (use --version for long and -V for short version)
+
+B<profile> if profile exits, create the symlink to load it from Mutt, otherwise exit with error
+
+=head1 INSTALL
+
+B<Muttprofile> requires no installation, but you might have to
+check the first line of the file (C<#!/usr/bin/perl -w>)
+and change the path to perl if needed (C<'which perl'> might be useful here :-)
+
+=head1 SETTING UP PROFILES
+
+B<Muttprofile> checks the profile files for the following information:
+
+# NAME: name for your profile
+
+# DESC: description of your profile
+
+This information is used for choosing and displaying available profiles.
+DESC is optional, but if NAME is missing, filename is used instead.
+
+=head1 USING MUTTPROFILE FROM MUTT
+
+Perhaps the easiest way to invoke B<muttprofile> from B<mutt> is to bind a
+key with mutt macro command. For example, adding this to your F<muttrc>-file
+
+macro	index	<F10>	"!muttprofile\n:source ~/.mutt/profile.active\nm" "New message with profile"
+
+binds the function key <F10> to start muttprofile, load the profile and start a new message
+
+=head1 EXIT CODES
+
+The default exit codes for muttprofile are:
+
+    0 OK
+    1 PROFILE ALREADY ACTIVE
+    2 ERROR
+
+These codes can be used in shell scripts etc.
+
+=head1 FURTHER INFORMATION
+
+Discussion of profiles with Mutt: http://www.iki.fi/martti.rahkila/mutt/
+
+Mutt home page: http://www.mutt.org
+
+=head1 REQUIREMENTS
+
+B<muttprofile> requires B<Mutt> (obviously :-) and
+B<Perl> version 5 or later.
+
+The required perl modules are C<Term::Complete>
+and C<Getopt::Long> that both come with the Perl distribution.
+
+Please note that the C<Term::Complete> module in Perl 5.8.0
+may produce an error. This has been fixed in Perl 5.8.1.
+
+=head1 LICENCE
+
+B<muttprofile> is distibuted under GNU General Public Licence (GPL), same
+as Mutt. For details, see http://www.gnu.org/copyleft/gpl.html
+
+=head1 BUGS
+
+No known bugs at the moment. Inevitably to appear sooner or later.
+
+=head1 VERSION HISTORY
+
+=item 1.0.1 (current)
+
+Two bugfixes, details can be found from
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=218957
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=218960
+
+Additional bugfix regarding a case when active profile
+exist but is a file instead of symlink.
+
+2003-11-20 Martti Rahkila
+
+=item 1.0.0
+
+First public release.
+
+2000-05-10 Martti Rahkila
+
+=head1 AUTHOR
+
+  Martti Rahkila
+  martti.rahkila@iki.fi
+  http://www.iki.fi/martti.rahkila/mutt
+
+=head1 SEE ALSO
+
+L<mutt(1)|mutt>, L<perl(1)|perl>
+
+=cut
+
+# =======================================================================================
+

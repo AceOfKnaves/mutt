@@ -1,29 +1,27 @@
-#
-# ~/.mutt/aliases
-#
-# Command alias :
+# =======================================================================================
+#                   _   _
+#   _ __ ___  _   _| |_| |_ _ __ ___
+#  | '_ ` _ \| | | | __| __| '__/ __|
+#  | | | | | | |_| | |_| |_| | | (__
+#  |_| |_| |_|\__,_|\__|\__|_|  \___|
+# ---------------------------------------------------------------------------------------
+# Name: aliases
+# Note: default aliasi, oni koji uvek trebaju
+# =======================================================================================
+
+# === NOTES =============================================================================
 # Syntax: alias <name> <address_list>
-# <address_list> := <address>{,<address>}
+#         <address_list> := <address>{,<address>}
+# ---------------------------------------------------------------------------------------
 # Attention: !!! No mutt comments in the alias lines !!!
+# =======================================================================================
 
-alias nc-dev hubert, grzegorz, ziemowit
-alias nc-support mirko, andreas, alexander
+# === ALIAS FILE ========================================================================
+  set alias_file = "~/.mutt/sourced/aliases"
 
-# ~/bin/muttquery.py ncomputing nc-company | awk '/@/{c=$2; for(i=3; i<=NF; i++) c=c" "$i; print c" <"$1">"}' | while read c; do n=${c%% *}; echo alias $n:l \"$c\"; done >> aliases
-alias alessio "Alessio Sangalli <asangalli@ncomputing.com>"
-alias alexander "Alexander Nagy <alexnagy1@gmail.com>"
-alias andreas "Andreas Loy <aloy@ncomputing.com>"
-alias andy "Andy Bray <andyb@nc-company.com>"
-alias bart "Bart Yeh <byeh@ncomputing.com>"
-alias bill "Bill Platt <bplatt@ncomputing.com>"
-alias byran "Byran Longmire <blongmire@ncomputing.com>"
-alias grzegorz "Grzegorz Zajac <grzesiek@zezik.net>"
-alias hubert "Hubert Gburzynski <hubert@ncomputing.com>"
-alias jay "Jay Son <jay@ncomputing.com>"
-alias kathrin "Kathrin Maier <kathrin@nc-company.com>"
-alias klaus "Klaus Maier <klaus@ncomputing.com>"
-alias mirko "Mirko Lasarz <mirko@ncomputing.de>"
-alias randy "Randy Watson <rwatson@ncomputing.com>"
-alias ruy "Ruy Cesar <RCesar@ncomputing.com>"
-alias ziemowit "Ziemowit Zglinski <ziemowitz@gmail.com>"
+# === ALIASES ===========================================================================
 
+  alias aknaves		Ђорђе Тодоровић	<aceofknaves@gmail.com>
+  alias pmiler      Ђорђе Тодоровић	<postmanmiler@gmail.com>
+
+# =======================================================================================
